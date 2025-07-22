@@ -842,7 +842,7 @@
         // Load dynamic content
         function loadProducts() {
             // Load affiliate products
-            fetch('/api/affiliate-products')
+            fetch('/api/public/affiliate-products')
                 .then(response => response.json())
                 .then(products => {
                     const container = document.getElementById('affiliateProducts');
@@ -853,7 +853,7 @@
                 });
 
             // Load tours
-            fetch('/api/tours')
+            fetch('/api/public/tours')
                 .then(response => response.json())
                 .then(tours => {
                     const container = document.getElementById('tourProducts');
@@ -864,7 +864,7 @@
                 });
 
             // Load cars
-            fetch('/api/cars')
+            fetch('/api/public/cars')
                 .then(response => response.json())
                 .then(cars => {
                     const container = document.getElementById('carProducts');

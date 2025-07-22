@@ -293,6 +293,9 @@
                 <li><a href="#meta" class="nav-link">SEO & Meta Tags</a></li>
                 <li><a href="#links" class="nav-link">Liên Kết Ngoài</a></li>
                 <li><a href="/" target="_blank">Xem Website</a></li>
+                <li style="margin-top: 30px; border-top: 1px solid #2563eb; padding-top: 15px;">
+                    <a href="#" onclick="logout()" style="background-color: #dc3545;">Đăng Xuất</a>
+                </li>
             </ul>
         </div>
 
@@ -440,6 +443,22 @@
     </div>
 
     <script>
+        // Check authentication
+        if (!localStorage.getItem('adminAuth')) {
+            window.location.href = '/login';
+        }
+
+        // Add auth header to all fetch requests
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            if (args[0].includes('/api/')) {
+                args[1] = args[1] || {};
+                args[1].headers = args[1].headers || {};
+                args[1].headers['Authorization'] = 'Bearer ' + localStorage.getItem('adminAuth');
+            }
+            return originalFetch.apply(this, args);
+        };
+
         // Format number with thousand separators
         function formatNumberInput(input) {
             // Remove all non-digit characters
@@ -941,6 +960,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboard();
         });
+
+        // Logout function
+        function logout() {
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                localStorage.removeItem('adminAuth');
+                window.location.href = '/login';
+            }
+        }
     </script>
 </body>
 </html>

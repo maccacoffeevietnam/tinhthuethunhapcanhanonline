@@ -1,17 +1,76 @@
+require('dotenv').config();
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const basicAuth = require('express-basic-auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Admin credentials - THAY ĐỔI NGAY!
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ThueTNCN@2024';
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
+
+// Basic Auth cho admin
+const adminAuth = basicAuth({
+    users: { [ADMIN_USERNAME]: ADMIN_PASSWORD },
+    challenge: true,
+    unauthorizedResponse: (req) => {
+        return `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Truy cập bị từ chối</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        margin: 0;
+                        background-color: #f5f5f5;
+                    }
+                    .error-box {
+                        background: white;
+                        padding: 40px;
+                        border-radius: 10px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        text-align: center;
+                    }
+                    h1 {
+                        color: #dc3545;
+                        margin-bottom: 20px;
+                    }
+                    p {
+                        color: #666;
+                        margin-bottom: 20px;
+                    }
+                    a {
+                        color: #007bff;
+                        text-decoration: none;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="error-box">
+                    <h1>401 - Truy cập bị từ chối</h1>
+                    <p>Bạn cần đăng nhập để truy cập trang này.</p>
+                    <a href="/">Quay về trang chủ</a>
+                </div>
+            </body>
+            </html>
+        `;
+    }
+});
 
 // Create data directory for Railway
 const dataDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, 'data');
@@ -106,7 +165,7 @@ db.serialize(() => {
 
     // Insert default data if tables are empty
     db.get("SELECT COUNT(*) as count FROM settings", (err, row) => {
-        if (row.count === 0) {
+        if (row && row.count === 0) {
             // Insert default settings
             db.run("INSERT INTO settings (key, value) VALUES ('ga4', ''), ('search_console', ''), ('gtm', '')");
             
@@ -146,11 +205,41 @@ db.serialize(() => {
     });
 });
 
+// Serve HTML file
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Serve login page
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// Serve admin panel - YÊU CẦU ĐĂNG NHẬP
+app.get('/admin', adminAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 // API Routes
 
-// Get all bookings
-app.get('/api/bookings', (req, res) => {
-    db.all("SELECT * FROM bookings ORDER BY timestamp DESC", (err, rows) => {
+// Login endpoint
+app.post('/api/admin/login', (req, res) => {
+    const { username, password } = req.body;
+    
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        // Generate simple token (in production, use JWT)
+        const token = Buffer.from(`${username}:${password}`).toString('base64');
+        res.json({ success: true, token });
+    } else {
+        res.status(401).json({ error: 'Tên đăng nhập hoặc mật khẩu không đúng' });
+    }
+});
+
+// PUBLIC APIs (không cần auth)
+
+// Get affiliate products cho trang chính
+app.get('/api/public/affiliate-products', (req, res) => {
+    db.all("SELECT * FROM affiliate_products ORDER BY position, id", (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -159,7 +248,29 @@ app.get('/api/bookings', (req, res) => {
     });
 });
 
-// Create new booking
+// Get tours cho trang chính
+app.get('/api/public/tours', (req, res) => {
+    db.all("SELECT * FROM tours ORDER BY position, id", (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json(rows);
+    });
+});
+
+// Get cars cho trang chính
+app.get('/api/public/cars', (req, res) => {
+    db.all("SELECT * FROM cars ORDER BY position, id", (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json(rows);
+    });
+});
+
+// Create booking (public)
 app.post('/api/bookings', (req, res) => {
     const { product, name, phone } = req.body;
     db.run("INSERT INTO bookings (product, name, phone) VALUES (?, ?, ?)",
@@ -174,8 +285,32 @@ app.post('/api/bookings', (req, res) => {
     );
 });
 
-// Get affiliate products
-app.get('/api/affiliate-products', (req, res) => {
+// Get popup settings (public)
+app.get('/api/popup-settings', (req, res) => {
+    db.get("SELECT * FROM popup_settings WHERE id = 1", (err, row) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json(row || { enabled: false });
+    });
+});
+
+// ADMIN APIs (cần auth)
+
+// Get all bookings - ADMIN ONLY
+app.get('/api/bookings', adminAuth, (req, res) => {
+    db.all("SELECT * FROM bookings ORDER BY timestamp DESC", (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json(rows);
+    });
+});
+
+// Get affiliate products - ADMIN
+app.get('/api/affiliate-products', adminAuth, (req, res) => {
     db.all("SELECT * FROM affiliate_products ORDER BY position, id", (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -185,8 +320,8 @@ app.get('/api/affiliate-products', (req, res) => {
     });
 });
 
-// Update affiliate product
-app.put('/api/affiliate-products/:id', (req, res) => {
+// Update affiliate product - ADMIN
+app.put('/api/affiliate-products/:id', adminAuth, (req, res) => {
     const { title, image, link } = req.body;
     db.run("UPDATE affiliate_products SET title = ?, image = ?, link = ? WHERE id = ?",
         [title, image, link, req.params.id],
@@ -200,8 +335,8 @@ app.put('/api/affiliate-products/:id', (req, res) => {
     );
 });
 
-// Get tours
-app.get('/api/tours', (req, res) => {
+// Get tours - ADMIN
+app.get('/api/tours', adminAuth, (req, res) => {
     db.all("SELECT * FROM tours ORDER BY position, id", (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -211,8 +346,8 @@ app.get('/api/tours', (req, res) => {
     });
 });
 
-// Update tour
-app.put('/api/tours/:id', (req, res) => {
+// Update tour - ADMIN
+app.put('/api/tours/:id', adminAuth, (req, res) => {
     const { name, image, departure, transport, date, price } = req.body;
     db.run("UPDATE tours SET name = ?, image = ?, departure = ?, transport = ?, date = ?, price = ? WHERE id = ?",
         [name, image, departure, transport, date, price, req.params.id],
@@ -226,8 +361,8 @@ app.put('/api/tours/:id', (req, res) => {
     );
 });
 
-// Get cars
-app.get('/api/cars', (req, res) => {
+// Get cars - ADMIN
+app.get('/api/cars', adminAuth, (req, res) => {
     db.all("SELECT * FROM cars ORDER BY position, id", (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -237,8 +372,8 @@ app.get('/api/cars', (req, res) => {
     });
 });
 
-// Update car
-app.put('/api/cars/:id', (req, res) => {
+// Update car - ADMIN
+app.put('/api/cars/:id', adminAuth, (req, res) => {
     const { name, image, price } = req.body;
     db.run("UPDATE cars SET name = ?, image = ?, price = ? WHERE id = ?",
         [name, image, price, req.params.id],
@@ -252,8 +387,8 @@ app.put('/api/cars/:id', (req, res) => {
     );
 });
 
-// Get settings
-app.get('/api/settings', (req, res) => {
+// Get settings - ADMIN
+app.get('/api/settings', adminAuth, (req, res) => {
     db.all("SELECT * FROM settings", (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -267,8 +402,8 @@ app.get('/api/settings', (req, res) => {
     });
 });
 
-// Update settings
-app.put('/api/settings', (req, res) => {
+// Update settings - ADMIN
+app.put('/api/settings', adminAuth, (req, res) => {
     const settings = req.body;
     const promises = [];
     
@@ -289,19 +424,8 @@ app.put('/api/settings', (req, res) => {
         .catch(err => res.status(500).json({ error: err.message }));
 });
 
-// Get popup settings
-app.get('/api/popup-settings', (req, res) => {
-    db.get("SELECT * FROM popup_settings WHERE id = 1", (err, row) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        res.json(row || { enabled: false });
-    });
-});
-
-// Update popup settings
-app.put('/api/popup-settings', (req, res) => {
+// Update popup settings - ADMIN
+app.put('/api/popup-settings', adminAuth, (req, res) => {
     const { enabled, delay, type, content, link } = req.body;
     db.run("UPDATE popup_settings SET enabled = ?, delay = ?, type = ?, content = ?, link = ? WHERE id = 1",
         [enabled ? 1 : 0, delay, type, content, link],
@@ -315,8 +439,8 @@ app.put('/api/popup-settings', (req, res) => {
     );
 });
 
-// Get external links
-app.get('/api/external-links', (req, res) => {
+// Get external links - ADMIN
+app.get('/api/external-links', adminAuth, (req, res) => {
     db.all("SELECT * FROM external_links ORDER BY position, id", (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -326,8 +450,8 @@ app.get('/api/external-links', (req, res) => {
     });
 });
 
-// Update external link
-app.put('/api/external-links/:id', (req, res) => {
+// Update external link - ADMIN
+app.put('/api/external-links/:id', adminAuth, (req, res) => {
     const { anchor_text, url } = req.body;
     db.run("UPDATE external_links SET anchor_text = ?, url = ? WHERE id = ?",
         [anchor_text, url, req.params.id],
@@ -341,8 +465,8 @@ app.put('/api/external-links/:id', (req, res) => {
     );
 });
 
-// Get meta tags
-app.get('/api/meta-tags/:page', (req, res) => {
+// Get meta tags - ADMIN
+app.get('/api/meta-tags/:page', adminAuth, (req, res) => {
     db.get("SELECT * FROM meta_tags WHERE page = ?", [req.params.page], (err, row) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -352,8 +476,8 @@ app.get('/api/meta-tags/:page', (req, res) => {
     });
 });
 
-// Update meta tags
-app.put('/api/meta-tags/:page', (req, res) => {
+// Update meta tags - ADMIN
+app.put('/api/meta-tags/:page', adminAuth, (req, res) => {
     const { h1, h2, meta_description } = req.body;
     db.run("INSERT OR REPLACE INTO meta_tags (page, h1, h2, meta_description) VALUES (?, ?, ?, ?)",
         [req.params.page, h1, h2, meta_description],
@@ -365,16 +489,6 @@ app.put('/api/meta-tags/:page', (req, res) => {
             res.json({ message: 'Meta tags updated successfully' });
         }
     );
-});
-
-// Serve HTML file
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Serve admin panel
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 // Start server
