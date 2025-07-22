@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Công cụ tính thuế thu nhập cá nhân online chính xác nhất tại Việt Nam">
+    <title>Tính Thuế TNCN Online - Công Cụ Tính Thuế Thu Nhập Cá Nhân</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background-color: #1e3a8a;
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 28px;
+            text-align: center;
+        }
+
+        /* Navigation */
+        nav {
+            background-color: #2563eb;
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        nav li {
+            margin: 0 15px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        nav a:hover {
+            background-color: #1e40af;
+        }
+
+        /* Main Content */
+        main {
+            padding: 40px 0;
+        }
+
+        .section {
+            background-color: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            font-size: 24px;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 10px;
+        }
+
+        /* Helper text */
+        .helper-text {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #1e3a8a;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        /* Style for number inputs */
+        input[type="text"]#salary,
+        input[type="text"]#otherIncome,
+        input[type="text"]#socialInsurance,
+        input[type="text"]#healthInsurance,
+        input[type="text"]#unemploymentInsurance,
+        input[type="text"][id^="income"],
+        input[type="text"][id^="tax"] {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Buttons */
+        .btn {
+            background-color: #d4af37;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #b8941f;
+        }
+
+        .btn-secondary {
+            background-color: #1e3a8a;
+        }
+
+        .btn-secondary:hover {
+            background-color: #1e40af;
+        }
+
+        /* Results */
+        .result-box {
+            background-color: #f0f9ff;
+            border: 2px solid #2563eb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 20px;
+            color: #1e3a8a;
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .product-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-info h3 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            color: #d4af37;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        /* Popup */
+        .popup {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            padding: 20px;
+            max-width: 400px;
+            z-index: 999;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav li {
+                margin: 5px 0;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #monthlyInputs .form-group {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+
+            #monthlyInputs label {
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Công Cụ Tính Thuế TNCN Online</h1>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#tinh-thue-luong">Tính Thuế Lương</a></li>
+                <li><a href="#tinh-thue-khac">Thu Nhập Khác</a></li>
+                <li><a href="#quyet-toan">Quyết Toán Thuế</a></li>
+                <li><a href="#affiliate">Sản Phẩm</a></li>
+                <li><a href="#tours">Tour Du Lịch</a></li>
+                <li><a href="#cars">Ô Tô</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Section 1: Tính thuế từ lương -->
+        <section id="tinh-thue-luong" class="section">
+            <h2>Tính Thuế Thu Nhập Từ Lương</h2>
+            <form id="taxForm">
+                <div class="form-group">
+                    <label for="salaryType">Loại thu nhập:</label>
+                    <select id="salaryType">
+                        <option value="gross">Lương GROSS (Tổng thu nhập)</option>
+                        <option value="net">Lương NET (Thực nhận)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="salary">Thu nhập hàng tháng (VNĐ):</label>
+                    <input type="text" id="salary" placeholder="Ví dụ: 20.000.000" required>
+                    <div class="helper-text">Số tiền sẽ tự động định dạng với dấu chấm phân cách hàng nghìn</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Các khoản được miễn thuế:</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="lunchAllowance">
+                        <label for="lunchAllowance">Phụ cấp ăn trưa (tối đa 730.000 VNĐ/tháng)</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="phoneAllowance">
+                        <label for="phoneAllowance">Phụ cấp điện thoại (tối đa 200.000 VNĐ/tháng)</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="clothingAllowance">
+                        <label for="clothingAllowance">Phụ cấp trang phục (tối đa 500.000 VNĐ/tháng)</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="dependents">Số người phụ thuộc:</label>
+                    <input type="number" id="dependents" min="0" value="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="insurance">Đóng bảo hiểm:</label>
+                    <select id="insurance">
+                        <option value="auto">Tự động tính (10.5%)</option>
+                        <option value="manual">Nhập thủ công</option>
+                    </select>
+                </div>
+
+                <div id="manualInsurance" style="display: none;">
+                    <div class="form-group">
+                        <label for="socialInsurance">BHXH (8%):</label>
+                        <input type="text" id="socialInsurance" placeholder="Ví dụ: 1.600.000">
+                    </div>
+                    <div class="form-group">
+                        <label for="healthInsurance">BHYT (1.5%):</label>
+                        <input type="text" id="healthInsurance" placeholder="Ví dụ: 300.000">
+                    </div>
+                    <div class="form-group">
+                        <label for="unemploymentInsurance">BHTN (1%):</label>
+                        <input type="text" id="unemploymentInsurance" placeholder="Ví dụ: 200.000">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Tính Thuế</button>
+            </form>
+
+            <div id="taxResult" class="result-box" style="display: none;">
+                <h3>Kết quả tính thuế:</h3>
+                <div class="result-item">
+                    <span>Tổng thu nhập:</span>
+                    <span id="totalIncome">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Các khoản miễn thuế:</span>
+                    <span id="taxExempt">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Thu nhập chịu thuế:</span>
+                    <span id="taxableIncome">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Giảm trừ gia cảnh:</span>
+                    <span id="deductions">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Bảo hiểm bắt buộc:</span>
+                    <span id="totalInsurance">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Thu nhập tính thuế:</span>
+                    <span id="assessableIncome">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Thuế TNCN phải nộp:</span>
+                    <span id="taxAmount">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Lương thực nhận (NET):</span>
+                    <span id="netSalary">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Tính thuế thu nhập khác -->
+        <section id="tinh-thue-khac" class="section">
+            <h2>Tính Thuế Thu Nhập Không Thường Xuyên</h2>
+            <form id="otherIncomeForm">
+                <div class="form-group">
+                    <label for="residentStatus">Tình trạng cư trú:</label>
+                    <select id="residentStatus">
+                        <option value="resident">Cá nhân cư trú</option>
+                        <option value="non-resident">Cá nhân không cư trú</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="otherIncome">Thu nhập (VNĐ):</label>
+                    <input type="text" id="otherIncome" placeholder="Ví dụ: 5.000.000" required>
+                </div>
+
+                <button type="submit" class="btn">Tính Thuế</button>
+            </form>
+
+            <div id="otherIncomeResult" class="result-box" style="display: none;">
+                <h3>Kết quả:</h3>
+                <div class="result-item">
+                    <span>Thu nhập:</span>
+                    <span id="otherIncomeAmount">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Thuế suất:</span>
+                    <span id="otherTaxRate">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Thuế phải nộp:</span>
+                    <span id="otherTaxAmount">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Quyết toán thuế -->
+        <section id="quyet-toan" class="section">
+            <h2>Hỗ Trợ Quyết Toán Thuế Cuối Năm</h2>
+            <form id="yearEndForm">
+                <div class="form-group">
+                    <label>Nhập thu nhập và thuế đã nộp theo tháng:</label>
+                    <div id="monthlyInputs">
+                        <!-- Monthly inputs will be generated by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="yearDependents">Số người phụ thuộc (cả năm):</label>
+                    <input type="number" id="yearDependents" min="0" value="0">
+                </div>
+
+                <button type="submit" class="btn">Tính Quyết Toán</button>
+            </form>
+
+            <div id="yearEndResult" class="result-box" style="display: none;">
+                <h3>Kết quả quyết toán:</h3>
+                <div class="result-item">
+                    <span>Tổng thu nhập cả năm:</span>
+                    <span id="yearTotalIncome">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Tổng thuế phải nộp:</span>
+                    <span id="yearTaxDue">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Tổng thuế đã nộp:</span>
+                    <span id="yearTaxPaid">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Kết quả:</span>
+                    <span id="yearEndBalance">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Affiliate Products -->
+        <section id="affiliate" class="section">
+            <h2>Sản Phẩm Khuyến Nghị</h2>
+            <div class="product-grid" id="affiliateProducts">
+                <!-- Products will be loaded dynamically -->
+            </div>
+        </section>
+
+        <!-- Section 5: Tours -->
+        <section id="tours" class="section">
+            <h2>Tour Du Lịch Hot</h2>
+            <div class="product-grid" id="tourProducts">
+                <!-- Tours will be loaded dynamically -->
+            </div>
+        </section>
+
+        <!-- Section 6: Cars -->
+        <section id="cars" class="section">
+            <h2>Ô Tô Đang Khuyến Mãi</h2>
+            <div class="product-grid" id="carProducts">
+                <!-- Cars will be loaded dynamically -->
+            </div>
+        </section>
+
+        <!-- External Links Section -->
+        <section class="section">
+            <h2>Liên Kết Hữu Ích</h2>
+            <div id="externalLinks">
+                <!-- Links will be loaded dynamically -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for booking -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Đăng Ký Tư Vấn</h3>
+            <form id="bookingForm">
+                <input type="hidden" id="bookingProduct" name="product">
+                <div class="form-group">
+                    <label for="customerName">Họ và tên:</label>
+                    <input type="text" id="customerName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerPhone">Số điện thoại:</label>
+                    <input type="text" id="customerPhone" name="phone" required>
+                </div>
+                <button type="submit" class="btn">Gửi Thông Tin</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Popup -->
+    <div id="welcomePopup" class="popup">
+        <span class="close" onclick="closePopup()">&times;</span>
+        <div id="popupContent">
+            <!-- Popup content will be loaded dynamically -->
+        </div>
+    </div>
+
+    <script>
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+
+        // Format number with thousand separators
+        function formatNumberInput(input) {
+            // Remove all non-digit characters
+            let value = input.value.replace(/\D/g, '');
+            
+            // Add thousand separators
+            if (value) {
+                value = parseInt(value).toLocaleString('vi-VN');
+            }
+            
+            input.value = value;
+        }
+
+        // Parse formatted number to plain number
+        function parseFormattedNumber(value) {
+            if (!value) return 0;
+            return parseInt(value.toString().replace(/\./g, '')) || 0;
+        }
+
+        // Tax calculation logic
+        function calculateProgressiveTax(income) {
+            let tax = 0;
+            const brackets = [
+                { min: 0, max: 5000000, rate: 0.05 },
+                { min: 5000000, max: 10000000, rate: 0.10 },
+                { min: 10000000, max: 18000000, rate: 0.15 },
+                { min: 18000000, max: 32000000, rate: 0.20 },
+                { min: 32000000, max: 52000000, rate: 0.25 },
+                { min: 52000000, max: 80000000, rate: 0.30 },
+                { min: 80000000, max: Infinity, rate: 0.35 }
+            ];
+
+            for (let bracket of brackets) {
+                if (income > bracket.min) {
+                    const taxableInBracket = Math.min(income - bracket.min, bracket.max - bracket.min);
+                    tax += taxableInBracket * bracket.rate;
+                }
+            }
+
+            return tax;
+        }
+
+        // Salary tax form handler
+        document.getElementById('taxForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const salaryType = document.getElementById('salaryType').value;
+            const salary = parseFormattedNumber(document.getElementById('salary').value);
+            const dependents = parseInt(document.getElementById('dependents').value) || 0;
+
+            // Calculate allowances
+            let taxExempt = 0;
+            if (document.getElementById('lunchAllowance').checked) taxExempt += 730000;
+            if (document.getElementById('phoneAllowance').checked) taxExempt += 200000;
+            if (document.getElementById('clothingAllowance').checked) taxExempt += 500000;
+
+            // Calculate insurance
+            let socialIns, healthIns, unemploymentIns;
+            const insuranceType = document.getElementById('insurance').value;
+            
+            if (insuranceType === 'auto') {
+                const insuranceBase = Math.min(salary, 29800000); // Max base salary for insurance
+                socialIns = insuranceBase * 0.08;
+                healthIns = insuranceBase * 0.015;
+                unemploymentIns = insuranceBase * 0.01;
+            } else {
+                socialIns = parseFormattedNumber(document.getElementById('socialInsurance').value);
+                healthIns = parseFormattedNumber(document.getElementById('healthInsurance').value);
+                unemploymentIns = parseFormattedNumber(document.getElementById('unemploymentInsurance').value);
+            }
+
+            const totalInsurance = socialIns + healthIns + unemploymentIns;
+
+            // Personal deduction
+            const personalDeduction = 11000000;
+            const dependentDeduction = dependents * 4400000;
+            const totalDeduction = personalDeduction + dependentDeduction;
+
+            let grossSalary, netSalary, taxAmount;
+
+            if (salaryType === 'gross') {
+                grossSalary = salary;
+                const taxableIncome = grossSalary - taxExempt;
+                const assessableIncome = Math.max(0, taxableIncome - totalDeduction - totalInsurance);
+                taxAmount = calculateProgressiveTax(assessableIncome);
+                netSalary = grossSalary - totalInsurance - taxAmount;
+            } else {
+                // NET to GROSS conversion (simplified)
+                netSalary = salary;
+                // This is a simplified calculation - in reality it's more complex
+                grossSalary = netSalary + totalInsurance;
+                const taxableIncome = grossSalary - taxExempt;
+                const assessableIncome = Math.max(0, taxableIncome - totalDeduction - totalInsurance);
+                taxAmount = calculateProgressiveTax(assessableIncome);
+                grossSalary = netSalary + totalInsurance + taxAmount;
+            }
+
+            // Display results
+            document.getElementById('totalIncome').textContent = formatCurrency(grossSalary);
+            document.getElementById('taxExempt').textContent = formatCurrency(taxExempt);
+            document.getElementById('taxableIncome').textContent = formatCurrency(grossSalary - taxExempt);
+            document.getElementById('deductions').textContent = formatCurrency(totalDeduction);
+            document.getElementById('totalInsurance').textContent = formatCurrency(totalInsurance);
+            document.getElementById('assessableIncome').textContent = formatCurrency(Math.max(0, grossSalary - taxExempt - totalDeduction - totalInsurance));
+            document.getElementById('taxAmount').textContent = formatCurrency(taxAmount);
+            document.getElementById('netSalary').textContent = formatCurrency(netSalary);
+
+            document.getElementById('taxResult').style.display = 'block';
+        });
+
+        // Other income form handler
+        document.getElementById('otherIncomeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const status = document.getElementById('residentStatus').value;
+            const income = parseFormattedNumber(document.getElementById('otherIncome').value);
+
+            let taxRate, taxAmount;
+
+            if (status === 'resident' && income >= 2000000) {
+                taxRate = 0.10;
+                taxAmount = income * taxRate;
+            } else if (status === 'non-resident') {
+                taxRate = 0.20;
+                taxAmount = income * taxRate;
+            } else {
+                taxRate = 0;
+                taxAmount = 0;
+            }
+
+            document.getElementById('otherIncomeAmount').textContent = formatCurrency(income);
+            document.getElementById('otherTaxRate').textContent = (taxRate * 100) + '%';
+            document.getElementById('otherTaxAmount').textContent = formatCurrency(taxAmount);
+
+            document.getElementById('otherIncomeResult').style.display = 'block';
+        });
+
+        // Insurance type change handler
+        document.getElementById('insurance').addEventListener('change', function() {
+            const manualSection = document.getElementById('manualInsurance');
+            if (this.value === 'manual') {
+                manualSection.style.display = 'block';
+            } else {
+                manualSection.style.display = 'none';
+            }
+        });
+
+        // Generate monthly inputs for year-end tax
+        function generateMonthlyInputs() {
+            const container = document.getElementById('monthlyInputs');
+            const months = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+                           'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+            
+            months.forEach((month, index) => {
+                const monthDiv = document.createElement('div');
+                monthDiv.className = 'form-group';
+                monthDiv.innerHTML = `
+                    <label>${month}:</label>
+                    <input type="text" placeholder="Thu nhập (VD: 20.000.000)" id="income${index}">
+                    <input type="text" placeholder="Thuế đã nộp (VD: 2.000.000)" id="tax${index}">
+                `;
+                container.appendChild(monthDiv);
+            });
+        }
+
+        generateMonthlyInputs();
+
+        generateMonthlyInputs();
+
+        // Year-end tax form handler
+        document.getElementById('yearEndForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            let totalYearIncome = 0;
+            let totalYearTaxPaid = 0;
+
+            for (let i = 0; i < 12; i++) {
+                const income = parseFormattedNumber(document.getElementById(`income${i}`).value);
+                const tax = parseFormattedNumber(document.getElementById(`tax${i}`).value);
+                totalYearIncome += income;
+                totalYearTaxPaid += tax;
+            }
+
+            const yearDependents = parseInt(document.getElementById('yearDependents').value) || 0;
+            const yearPersonalDeduction = 11000000 * 12;
+            const yearDependentDeduction = yearDependents * 4400000 * 12;
+            const yearTotalDeduction = yearPersonalDeduction + yearDependentDeduction;
+
+            // Simplified calculation
+            const yearAssessableIncome = Math.max(0, totalYearIncome - yearTotalDeduction);
+            const yearTaxDue = calculateProgressiveTax(yearAssessableIncome);
+            const yearEndBalance = totalYearTaxPaid - yearTaxDue;
+
+            document.getElementById('yearTotalIncome').textContent = formatCurrency(totalYearIncome);
+            document.getElementById('yearTaxDue').textContent = formatCurrency(yearTaxDue);
+            document.getElementById('yearTaxPaid').textContent = formatCurrency(totalYearTaxPaid);
+            
+            if (yearEndBalance > 0) {
+                document.getElementById('yearEndBalance').textContent = 
+                    `Được hoàn lại: ${formatCurrency(yearEndBalance)}`;
+            } else {
+                document.getElementById('yearEndBalance').textContent = 
+                    `Phải nộp thêm: ${formatCurrency(Math.abs(yearEndBalance))}`;
+            }
+
+            document.getElementById('yearEndResult').style.display = 'block';
+        });
+
+        // Modal handlers
+        const modal = document.getElementById('bookingModal');
+        const closeBtn = document.getElementsByClassName('close')[0];
+
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Booking form handler
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                product: document.getElementById('bookingProduct').value,
+                name: document.getElementById('customerName').value,
+                phone: document.getElementById('customerPhone').value,
+                timestamp: new Date().toISOString()
+            };
+
+            // Send to server
+            fetch('/api/bookings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Đăng ký thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.');
+                modal.style.display = 'none';
+                document.getElementById('bookingForm').reset();
+            })
+            .catch(error => {
+                alert('Có lỗi xảy ra. Vui lòng thử lại.');
+            });
+        });
+
+        // Load dynamic content
+        function loadProducts() {
+            // Load affiliate products
+            fetch('/api/affiliate-products')
+                .then(response => response.json())
+                .then(products => {
+                    const container = document.getElementById('affiliateProducts');
+                    products.forEach(product => {
+                        const card = createProductCard(product, 'affiliate');
+                        container.appendChild(card);
+                    });
+                });
+
+            // Load tours
+            fetch('/api/tours')
+                .then(response => response.json())
+                .then(tours => {
+                    const container = document.getElementById('tourProducts');
+                    tours.forEach(tour => {
+                        const card = createTourCard(tour);
+                        container.appendChild(card);
+                    });
+                });
+
+            // Load cars
+            fetch('/api/cars')
+                .then(response => response.json())
+                .then(cars => {
+                    const container = document.getElementById('carProducts');
+                    cars.forEach(car => {
+                        const card = createCarCard(car);
+                        container.appendChild(card);
+                    });
+                });
+        }
+
+        function createProductCard(product, type) {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <img src="${product.image}" alt="${product.title}">
+                <div class="product-info">
+                    <h3>${product.title}</h3>
+                    <a href="${product.link}" target="_blank" class="btn btn-secondary">Xem Chi Tiết</a>
+                </div>
+            `;
+            return card;
+        }
+
+        function createTourCard(tour) {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <img src="${tour.image}" alt="${tour.name}">
+                <div class="product-info">
+                    <h3>${tour.name}</h3>
+                    <p>Khởi hành: ${tour.departure}</p>
+                    <p>Phương tiện: ${tour.transport}</p>
+                    <p>Ngày: ${tour.date}</p>
+                    <p class="product-price">${formatCurrency(tour.price)}</p>
+                    <button class="btn" onclick="openBooking('${tour.name}')">Đặt Tour</button>
+                </div>
+            `;
+            return card;
+        }
+
+        function createCarCard(car) {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <img src="${car.image}" alt="${car.name}">
+                <div class="product-info">
+                    <h3>${car.name}</h3>
+                    <p class="product-price">${formatCurrency(car.price)}</p>
+                    <button class="btn" onclick="openBooking('${car.name}')">Tư Vấn</button>
+                </div>
+            `;
+            return card;
+        }
+
+        function openBooking(productName) {
+            document.getElementById('bookingProduct').value = productName;
+            document.getElementById('bookingModal').style.display = 'block';
+        }
+
+        // Popup functionality
+        function showPopup() {
+            // Check if popup should be shown (can be configured in admin)
+            fetch('/api/popup-settings')
+                .then(response => response.json())
+                .then(settings => {
+                    if (settings.enabled) {
+                        setTimeout(() => {
+                            document.getElementById('welcomePopup').style.display = 'block';
+                        }, settings.delay * 1000);
+                    }
+                });
+        }
+
+        function closePopup() {
+            document.getElementById('welcomePopup').style.display = 'none';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
+            showPopup();
+            
+            // Setup number formatting after inputs are generated
+            setTimeout(() => {
+                const numberInputs = [
+                    'salary',
+                    'socialInsurance',
+                    'healthInsurance', 
+                    'unemploymentInsurance',
+                    'otherIncome'
+                ];
+
+                // Add month income inputs
+                for (let i = 0; i < 12; i++) {
+                    numberInputs.push(`income${i}`);
+                    numberInputs.push(`tax${i}`);
+                }
+
+                // Add formatting to each input
+                numberInputs.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        input.addEventListener('input', function() {
+                            formatNumberInput(this);
+                        });
+                        
+                        input.addEventListener('focus', function() {
+                            this.select();
+                        });
+                    }
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>

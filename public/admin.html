@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Quản Trị Website Tính Thuế</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #1e3a8a;
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+            font-size: 24px;
+            color: #d4af37;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 15px;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background-color: #2563eb;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 30px;
+        }
+
+        .section {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        h3 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            font-size: 22px;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 10px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #1e3a8a;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="url"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        /* Style for price inputs */
+        input[type="text"][name="price"] {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            background-color: #d4af37;
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            background-color: #b8941f;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #1e3a8a;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Product Card Preview */
+        .preview-card {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .preview-card h4 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1e3a8a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Edit Form */
+        .edit-form {
+            background-color: #f0f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .edit-form.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>Admin Dashboard</h2>
+            <ul>
+                <li><a href="#dashboard" class="nav-link active">Tổng Quan</a></li>
+                <li><a href="#bookings" class="nav-link">Đơn Đặt Hàng</a></li>
+                <li><a href="#products" class="nav-link">Sản Phẩm Affiliate</a></li>
+                <li><a href="#tours" class="nav-link">Tour Du Lịch</a></li>
+                <li><a href="#cars" class="nav-link">Ô Tô</a></li>
+                <li><a href="#settings" class="nav-link">Cài Đặt Chung</a></li>
+                <li><a href="#popup" class="nav-link">Popup</a></li>
+                <li><a href="#meta" class="nav-link">SEO & Meta Tags</a></li>
+                <li><a href="#links" class="nav-link">Liên Kết Ngoài</a></li>
+                <li><a href="/" target="_blank">Xem Website</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div id="alert-container"></div>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <h3>Tổng Quan</h3>
+                <div class="preview-card">
+                    <h4>Thống Kê Nhanh</h4>
+                    <p>Tổng đơn đặt hàng: <span id="totalBookings">0</span></p>
+                    <p>Sản phẩm affiliate: <span id="totalProducts">0</span></p>
+                    <p>Tour du lịch: <span id="totalTours">0</span></p>
+                    <p>Ô tô: <span id="totalCars">0</span></p>
+                </div>
+            </section>
+
+            <!-- Bookings Section -->
+            <section id="bookings" class="section">
+                <h3>Quản Lý Đơn Đặt Hàng</h3>
+                <table id="bookingsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Sản Phẩm</th>
+                            <th>Họ Tên</th>
+                            <th>Số Điện Thoại</th>
+                            <th>Thời Gian</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+
+            <!-- Products Section -->
+            <section id="products" class="section">
+                <h3>Quản Lý Sản Phẩm Affiliate</h3>
+                <div id="productsList"></div>
+            </section>
+
+            <!-- Tours Section -->
+            <section id="tours" class="section">
+                <h3>Quản Lý Tour Du Lịch</h3>
+                <div id="toursList"></div>
+            </section>
+
+            <!-- Cars Section -->
+            <section id="cars" class="section">
+                <h3>Quản Lý Ô Tô</h3>
+                <div id="carsList"></div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="section">
+                <h3>Cài Đặt Chung</h3>
+                <form id="settingsForm">
+                    <div class="form-group">
+                        <label for="ga4">Google Analytics 4 ID:</label>
+                        <input type="text" id="ga4" name="ga4" placeholder="G-XXXXXXXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label for="search_console">Google Search Console Verification:</label>
+                        <input type="text" id="search_console" name="search_console" placeholder="HTML tag content">
+                    </div>
+                    <div class="form-group">
+                        <label for="gtm">Google Tag Manager ID:</label>
+                        <input type="text" id="gtm" name="gtm" placeholder="GTM-XXXXXXX">
+                    </div>
+                    <button type="submit" class="btn">Lưu Cài Đặt</button>
+                </form>
+            </section>
+
+            <!-- Popup Section -->
+            <section id="popup" class="section">
+                <h3>Cài Đặt Popup</h3>
+                <form id="popupForm">
+                    <div class="form-group">
+                        <label for="popupEnabled">Bật Popup:</label>
+                        <label class="switch">
+                            <input type="checkbox" id="popupEnabled">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="popupDelay">Thời gian hiển thị (giây):</label>
+                        <input type="number" id="popupDelay" min="0" value="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="popupType">Loại nội dung:</label>
+                        <select id="popupType">
+                            <option value="image">Hình ảnh</option>
+                            <option value="text">Văn bản</option>
+                            <option value="video">Video</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="popupContent">Nội dung (URL hoặc văn bản):</label>
+                        <textarea id="popupContent"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="popupLink">Link điều hướng:</label>
+                        <input type="url" id="popupLink">
+                    </div>
+                    <button type="submit" class="btn">Lưu Cài Đặt Popup</button>
+                </form>
+            </section>
+
+            <!-- Meta Tags Section -->
+            <section id="meta" class="section">
+                <h3>SEO & Meta Tags</h3>
+                <form id="metaForm">
+                    <div class="form-group">
+                        <label for="pageSelect">Chọn trang:</label>
+                        <select id="pageSelect">
+                            <option value="home">Trang chủ</option>
+                            <option value="tax-salary">Tính thuế lương</option>
+                            <option value="tax-other">Thu nhập khác</option>
+                            <option value="year-end">Quyết toán thuế</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="h1Tag">Thẻ H1:</label>
+                        <input type="text" id="h1Tag">
+                    </div>
+                    <div class="form-group">
+                        <label for="h2Tag">Thẻ H2:</label>
+                        <input type="text" id="h2Tag">
+                    </div>
+                    <div class="form-group">
+                        <label for="metaDescription">Meta Description:</label>
+                        <textarea id="metaDescription"></textarea>
+                    </div>
+                    <button type="submit" class="btn">Lưu Meta Tags</button>
+                </form>
+            </section>
+
+            <!-- External Links Section -->
+            <section id="links" class="section">
+                <h3>Quản Lý Liên Kết Ngoài</h3>
+                <div id="linksList"></div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Format number with thousand separators
+        function formatNumberInput(input) {
+            // Remove all non-digit characters
+            let value = input.value.replace(/\D/g, '');
+            
+            // Add thousand separators
+            if (value) {
+                value = parseInt(value).toLocaleString('vi-VN');
+            }
+            
+            input.value = value;
+        }
+
+        // Parse formatted number to plain number
+        function parseFormattedNumber(value) {
+            if (!value) return 0;
+            return parseInt(value.toString().replace(/\./g, '')) || 0;
+        }
+
+        // Navigation handling
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.getAttribute('href').substring(1);
+                
+                // Update active nav
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show corresponding section
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                
+                // Load data for the section
+                loadSectionData(target);
+            });
+        });
+
+        // Load data for specific section
+        function loadSectionData(section) {
+            switch(section) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'bookings':
+                    loadBookings();
+                    break;
+                case 'products':
+                    loadProducts();
+                    break;
+                case 'tours':
+                    loadTours();
+                    break;
+                case 'cars':
+                    loadCars();
+                    break;
+                case 'settings':
+                    loadSettings();
+                    break;
+                case 'popup':
+                    loadPopupSettings();
+                    break;
+                case 'links':
+                    loadLinks();
+                    break;
+            }
+        }
+
+        // Show alert message
+        function showAlert(message, type = 'success') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            const container = document.getElementById('alert-container');
+            container.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+
+        // Dashboard
+        function loadDashboard() {
+            fetch('/api/bookings')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('totalBookings').textContent = data.length;
+                });
+            
+            fetch('/api/affiliate-products')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('totalProducts').textContent = data.length;
+                });
+            
+            fetch('/api/tours')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('totalTours').textContent = data.length;
+                });
+            
+            fetch('/api/cars')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('totalCars').textContent = data.length;
+                });
+        }
+
+        // Bookings
+        function loadBookings() {
+            fetch('/api/bookings')
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.querySelector('#bookingsTable tbody');
+                    tbody.innerHTML = '';
+                    
+                    data.forEach(booking => {
+                        const row = tbody.insertRow();
+                        row.innerHTML = `
+                            <td>${booking.id}</td>
+                            <td>${booking.product}</td>
+                            <td>${booking.name}</td>
+                            <td>${booking.phone}</td>
+                            <td>${new Date(booking.timestamp).toLocaleString('vi-VN')}</td>
+                        `;
+                    });
+                });
+        }
+
+        // Products
+        function loadProducts() {
+            fetch('/api/affiliate-products')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('productsList');
+                    container.innerHTML = '';
+                    
+                    data.forEach(product => {
+                        const productDiv = document.createElement('div');
+                        productDiv.className = 'preview-card';
+                        productDiv.innerHTML = `
+                            <h4>${product.title}</h4>
+                            <p>Hình ảnh: ${product.image}</p>
+                            <p>Link: ${product.link}</p>
+                            <button class="btn" onclick="editProduct(${product.id})">Chỉnh sửa</button>
+                            <div id="edit-product-${product.id}" class="edit-form">
+                                <form onsubmit="updateProduct(event, ${product.id})">
+                                    <div class="form-group">
+                                        <label>Tiêu đề:</label>
+                                        <input type="text" name="title" value="${product.title}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>URL hình ảnh:</label>
+                                        <input type="url" name="image" value="${product.image}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Link sản phẩm:</label>
+                                        <input type="url" name="link" value="${product.link}" required>
+                                    </div>
+                                    <button type="submit" class="btn">Lưu</button>
+                                    <button type="button" class="btn btn-danger" onclick="cancelEdit('product', ${product.id})">Hủy</button>
+                                </form>
+                            </div>
+                        `;
+                        container.appendChild(productDiv);
+                    });
+                });
+        }
+
+        // Tours
+        function loadTours() {
+            fetch('/api/tours')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('toursList');
+                    container.innerHTML = '';
+                    
+                    data.forEach(tour => {
+                        const tourDiv = document.createElement('div');
+                        tourDiv.className = 'preview-card';
+                        tourDiv.innerHTML = `
+                            <h4>${tour.name}</h4>
+                            <p>Khởi hành: ${tour.departure}</p>
+                            <p>Phương tiện: ${tour.transport}</p>
+                            <p>Ngày: ${tour.date}</p>
+                            <p>Giá: ${formatCurrency(tour.price)}</p>
+                            <button class="btn" onclick="editTour(${tour.id})">Chỉnh sửa</button>
+                            <div id="edit-tour-${tour.id}" class="edit-form">
+                                <form onsubmit="updateTour(event, ${tour.id})">
+                                    <div class="form-group">
+                                        <label>Tên tour:</label>
+                                        <input type="text" name="name" value="${tour.name}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>URL hình ảnh:</label>
+                                        <input type="url" name="image" value="${tour.image}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Nơi khởi hành:</label>
+                                        <input type="text" name="departure" value="${tour.departure}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Phương tiện:</label>
+                                        <input type="text" name="transport" value="${tour.transport}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Ngày khởi hành:</label>
+                                        <input type="text" name="date" value="${tour.date}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Giá tour:</label>
+                                        <input type="text" name="price" value="${tour.price.toLocaleString('vi-VN')}" required onkeyup="formatNumberInput(this)">
+                                    </div>
+                                    <button type="submit" class="btn">Lưu</button>
+                                    <button type="button" class="btn btn-danger" onclick="cancelEdit('tour', ${tour.id})">Hủy</button>
+                                </form>
+                            </div>
+                        `;
+                        container.appendChild(tourDiv);
+                    });
+                });
+        }
+
+        // Cars
+        function loadCars() {
+            fetch('/api/cars')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('carsList');
+                    container.innerHTML = '';
+                    
+                    data.forEach(car => {
+                        const carDiv = document.createElement('div');
+                        carDiv.className = 'preview-card';
+                        carDiv.innerHTML = `
+                            <h4>${car.name}</h4>
+                            <p>Giá: ${formatCurrency(car.price)}</p>
+                            <button class="btn" onclick="editCar(${car.id})">Chỉnh sửa</button>
+                            <div id="edit-car-${car.id}" class="edit-form">
+                                <form onsubmit="updateCar(event, ${car.id})">
+                                    <div class="form-group">
+                                        <label>Tên xe:</label>
+                                        <input type="text" name="name" value="${car.name}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>URL hình ảnh:</label>
+                                        <input type="url" name="image" value="${car.image}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Giá xe:</label>
+                                        <input type="text" name="price" value="${car.price.toLocaleString('vi-VN')}" required onkeyup="formatNumberInput(this)">
+                                    </div>
+                                    <button type="submit" class="btn">Lưu</button>
+                                    <button type="button" class="btn btn-danger" onclick="cancelEdit('car', ${car.id})">Hủy</button>
+                                </form>
+                            </div>
+                        `;
+                        container.appendChild(carDiv);
+                    });
+                });
+        }
+
+        // Settings
+        function loadSettings() {
+            fetch('/api/settings')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('ga4').value = data.ga4 || '';
+                    document.getElementById('search_console').value = data.search_console || '';
+                    document.getElementById('gtm').value = data.gtm || '';
+                });
+        }
+
+        document.getElementById('settingsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const settings = {
+                ga4: document.getElementById('ga4').value,
+                search_console: document.getElementById('search_console').value,
+                gtm: document.getElementById('gtm').value
+            };
+            
+            fetch('/api/settings', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settings)
+            })
+            .then(res => res.json())
+            .then(data => {
+                showAlert('Cài đặt đã được lưu thành công!');
+            });
+        });
+
+        // Popup Settings
+        function loadPopupSettings() {
+            fetch('/api/popup-settings')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('popupEnabled').checked = data.enabled;
+                    document.getElementById('popupDelay').value = data.delay || 5;
+                    document.getElementById('popupType').value = data.type || 'image';
+                    document.getElementById('popupContent').value = data.content || '';
+                    document.getElementById('popupLink').value = data.link || '';
+                });
+        }
+
+        document.getElementById('popupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const settings = {
+                enabled: document.getElementById('popupEnabled').checked,
+                delay: parseInt(document.getElementById('popupDelay').value),
+                type: document.getElementById('popupType').value,
+                content: document.getElementById('popupContent').value,
+                link: document.getElementById('popupLink').value
+            };
+            
+            fetch('/api/popup-settings', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settings)
+            })
+            .then(res => res.json())
+            .then(data => {
+                showAlert('Cài đặt popup đã được lưu!');
+            });
+        });
+
+        // Meta Tags
+        document.getElementById('pageSelect').addEventListener('change', function() {
+            const page = this.value;
+            fetch(`/api/meta-tags/${page}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('h1Tag').value = data.h1 || '';
+                    document.getElementById('h2Tag').value = data.h2 || '';
+                    document.getElementById('metaDescription').value = data.meta_description || '';
+                });
+        });
+
+        document.getElementById('metaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const page = document.getElementById('pageSelect').value;
+            const metaData = {
+                h1: document.getElementById('h1Tag').value,
+                h2: document.getElementById('h2Tag').value,
+                meta_description: document.getElementById('metaDescription').value
+            };
+            
+            fetch(`/api/meta-tags/${page}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(metaData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                showAlert('Meta tags đã được cập nhật!');
+            });
+        });
+
+        // External Links
+        function loadLinks() {
+            fetch('/api/external-links')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('linksList');
+                    container.innerHTML = '';
+                    
+                    data.forEach(link => {
+                        const linkDiv = document.createElement('div');
+                        linkDiv.className = 'preview-card';
+                        linkDiv.innerHTML = `
+                            <h4>${link.anchor_text}</h4>
+                            <p>URL: ${link.url}</p>
+                            <button class="btn" onclick="editLink(${link.id})">Chỉnh sửa</button>
+                            <div id="edit-link-${link.id}" class="edit-form">
+                                <form onsubmit="updateLink(event, ${link.id})">
+                                    <div class="form-group">
+                                        <label>Anchor text:</label>
+                                        <input type="text" name="anchor_text" value="${link.anchor_text}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>URL:</label>
+                                        <input type="url" name="url" value="${link.url}" required>
+                                    </div>
+                                    <button type="submit" class="btn">Lưu</button>
+                                    <button type="button" class="btn btn-danger" onclick="cancelEdit('link', ${link.id})">Hủy</button>
+                                </form>
+                            </div>
+                        `;
+                        container.appendChild(linkDiv);
+                    });
+                });
+        }
+
+        // Edit functions
+        function editProduct(id) {
+            document.getElementById(`edit-product-${id}`).classList.add('active');
+        }
+
+        function editTour(id) {
+            document.getElementById(`edit-tour-${id}`).classList.add('active');
+        }
+
+        function editCar(id) {
+            document.getElementById(`edit-car-${id}`).classList.add('active');
+        }
+
+        function editLink(id) {
+            document.getElementById(`edit-link-${id}`).classList.add('active');
+        }
+
+        function cancelEdit(type, id) {
+            document.getElementById(`edit-${type}-${id}`).classList.remove('active');
+        }
+
+        // Update functions
+        function updateProduct(event, id) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+            
+            fetch(`/api/affiliate-products/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(result => {
+                showAlert('Sản phẩm đã được cập nhật!');
+                loadProducts();
+            });
+        }
+
+        function updateTour(event, id) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+            data.price = parseFormattedNumber(data.price);
+            
+            fetch(`/api/tours/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(result => {
+                showAlert('Tour đã được cập nhật!');
+                loadTours();
+            });
+        }
+
+        function updateCar(event, id) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+            data.price = parseFormattedNumber(data.price);
+            
+            fetch(`/api/cars/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(result => {
+                showAlert('Thông tin xe đã được cập nhật!');
+                loadCars();
+            });
+        }
+
+        function updateLink(event, id) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+            
+            fetch(`/api/external-links/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(result => {
+                showAlert('Link đã được cập nhật!');
+                loadLinks();
+            });
+        }
+
+        // Initialize dashboard on load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+        });
+    </script>
+</body>
+</html>
